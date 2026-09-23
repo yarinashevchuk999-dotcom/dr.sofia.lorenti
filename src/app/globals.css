@@ -1,0 +1,669 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DR. SOFIA LORENTI — dark gold (variant 2)
+
+   Same token names as the light editorial version — every existing
+   `text-ink` / `bg-milk` / `border-line` class keeps working, only the
+   *values* flipped: --ink and --brown (panel text) went light, --milk and
+   --ivory (panel surfaces) went dark. Two spots that used those tokens as
+   an explicit dark fill (not panel text/bg) were repointed by hand — see
+   --bg (page-level dark, was the hardcoded #1a1512) and --gold (the new
+   primary-accent fill, replacing the old milk/ink button fills).
+   ============================================================ */
+
+:root {
+  --bg: #1a1512;
+  --ivory: #2c241c;
+  --milk: #241d17;
+  --beige: #362c21;
+  --sand: #443626;
+  --taupe: #a9998663;
+  --taupe-solid: #a99986;
+  --line: #3c3226;
+  --brown: #c9bba5;
+  --ink: #f6f2ea;
+  --ink-soft: #ded2bd;
+  --gold: #cfa15a;
+  --gold-soft: #e8c88a;
+  --gold-ink: #241a0d;
+}
+
+@theme inline {
+  --color-ivory: var(--ivory);
+  --color-milk: var(--milk);
+  --color-beige: var(--beige);
+  --color-sand: var(--sand);
+  --color-line: var(--line);
+  --color-brown: var(--brown);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-inter);
+
+  --tracking-editorial: 0.28em;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  background: #1a1512;
+}
+
+section[id] {
+  scroll-margin-top: 1.25rem;
+}
+
+body {
+  background: #1a1512;
+  color: var(--ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "kern";
+  text-rendering: optimizeSpeed;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- editorial helpers --- */
+.eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-editorial);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.display {
+  font-family: var(--font-display), "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+/* --- hero header type (overrides .display / .eyebrow tracking + leading) --- */
+.hero-heading {
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.hero-copy {
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.rule {
+  height: 1px;
+  background: var(--line);
+  border: 0;
+}
+
+/* --- scroll reveal --- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(34px);
+  transition:
+    opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal="fade"] {
+  transform: none;
+}
+
+/* procedures showcase — each row slides in from the side its photo sits on */
+[data-reveal="left"] {
+  transform: translateX(-60px);
+}
+[data-reveal="right"] {
+  transform: translateX(60px);
+}
+
+[data-reveal="line"] {
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 1;
+  transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal="line"].is-visible {
+  transform: scaleX(1);
+}
+
+/* --- services rail scroll hint --- */
+@keyframes railHint {
+  0%,
+  100% {
+    transform: translate(0, -50%);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(6px, -50%);
+    opacity: 1;
+  }
+}
+.rail-hint {
+  animation: railHint 1.8s ease-in-out infinite;
+}
+
+/* --- procedures section gold accent line --- */
+@keyframes accentPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    box-shadow: 0 0 8px rgba(224, 182, 118, 0.4);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 16px rgba(224, 182, 118, 0.7);
+  }
+}
+.proc-accent {
+  background: #cfa15a;
+  animation: accentPulse 3.4s ease-in-out infinite;
+}
+
+/* --- hero image slow scale-in --- */
+@keyframes heroReveal {
+  from {
+    transform: scale(1.16);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.hero-media {
+  animation: heroReveal 2400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* --- living golden rim around the hero frame --- */
+@property --rim-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes rimSpin {
+  to {
+    --rim-angle: 360deg;
+  }
+}
+@keyframes bloomPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.hero-frame-bloom {
+  box-shadow:
+    0 0 16px rgba(255, 249, 238, 0.4),
+    0 0 55px 2px rgba(233, 197, 138, 0.5),
+    0 0 150px 10px rgba(214, 160, 64, 0.32),
+    inset 0 0 40px rgba(233, 197, 138, 0.12);
+  animation: bloomPulse 6s ease-in-out infinite;
+}
+/* reusable living golden frame glow (element gets the bloom, ::after is the rim) */
+/* only the glow + rim breathe — the framed content/photo stays at full opacity */
+@keyframes framePulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 12px rgba(255, 249, 238, 0.24),
+      0 0 36px 2px rgba(233, 197, 138, 0.28),
+      0 0 92px 6px rgba(214, 160, 64, 0.16);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(255, 249, 238, 0.42),
+      0 0 58px 3px rgba(233, 197, 138, 0.5),
+      0 0 138px 10px rgba(214, 160, 64, 0.32);
+  }
+}
+@keyframes rimGlow {
+  0%,
+  100% {
+    opacity: 0.68;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.frame-glow {
+  box-shadow:
+    0 0 14px rgba(255, 249, 238, 0.32),
+    0 0 46px 2px rgba(233, 197, 138, 0.38),
+    0 0 112px 7px rgba(214, 160, 64, 0.22);
+  animation: framePulse 6s ease-in-out infinite;
+}
+.frame-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--rim-angle),
+    rgba(224, 182, 118, 0.7) 0deg,
+    rgba(255, 251, 242, 1) 36deg,
+    rgba(238, 202, 138, 0.85) 66deg,
+    rgba(210, 168, 108, 0.55) 120deg,
+    rgba(210, 168, 108, 0.55) 205deg,
+    rgba(255, 251, 242, 1) 246deg,
+    rgba(206, 154, 62, 0.7) 282deg,
+    rgba(224, 182, 118, 0.7) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation:
+    rimSpin 8s linear infinite,
+    rimGlow 6s ease-in-out infinite;
+}
+
+.hero-frame-rim {
+  padding: 2.5px;
+  background: conic-gradient(
+    from var(--rim-angle),
+    rgba(224, 182, 118, 0.75) 0deg,
+    rgba(255, 251, 242, 1) 36deg,
+    rgba(238, 202, 138, 0.9) 66deg,
+    rgba(210, 168, 108, 0.6) 120deg,
+    rgba(210, 168, 108, 0.6) 205deg,
+    rgba(255, 251, 242, 1) 246deg,
+    rgba(206, 154, 62, 0.75) 282deg,
+    rgba(224, 182, 118, 0.75) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: rimSpin 8s linear infinite;
+}
+
+/* --- intro "power on" gate --- */
+.intro-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: #0c0b0a;
+  overflow: hidden;
+}
+.intro-gate.is-entering {
+  animation: gateOff 1150ms cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+@keyframes gateOff {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.intro-power {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--milk);
+  cursor: pointer;
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.intro-power:hover {
+  transform: scale(1.04);
+}
+.intro-power-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(224, 182, 118, 0.55);
+  animation: introPulse 3s ease-in-out infinite;
+}
+.intro-power:hover .intro-power-ring {
+  border-color: rgba(238, 202, 138, 0.9);
+}
+@keyframes introPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(224, 182, 118, 0.28),
+      0 0 34px rgba(214, 160, 64, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(224, 182, 118, 0),
+      0 0 56px rgba(214, 160, 64, 0.34);
+  }
+}
+.intro-hint {
+  font-size: 0.625rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.intro-gate.is-entering .intro-power,
+.intro-gate.is-entering .intro-hint {
+  animation: introFade 200ms ease forwards;
+}
+@keyframes introFade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* the site fades up from dark once the gate opens */
+.site-lit #top {
+  animation: siteLit 1150ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes siteLit {
+  0% {
+    filter: brightness(0.2) saturate(0.6);
+  }
+  45% {
+    filter: brightness(0.2) saturate(0.6);
+  }
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* ============================================================
+   2026 motion layer
+   - native CSS scroll-driven animations (no main-thread JS)
+   - view transitions for the language switch
+   - restrained micro-interactions + film grain
+   ============================================================ */
+
+/* scroll progress — hairline gold bar driven by document scroll */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 190;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(
+    90deg,
+    rgba(224, 182, 118, 0.35),
+    rgba(238, 202, 138, 1) 55%,
+    rgba(206, 154, 62, 0.9)
+  );
+  pointer-events: none;
+  visibility: hidden;
+}
+.site-lit .scroll-progress {
+  visibility: visible;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    animation: progressGrow linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes progressGrow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* film grain — barely-there, editorial. absolute (not fixed) so the browser
+   can cache the blended layer and just translate it while scrolling. */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* restrained button micro-interaction: lift on hover, settle on press */
+.btn-lift {
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s ease,
+    background-color 0.5s ease,
+    color 0.5s ease,
+    border-color 0.5s ease;
+}
+.btn-lift:hover {
+  transform: translateY(-2px);
+}
+.btn-lift:active {
+  transform: translateY(0);
+}
+
+/* native scroll-driven enter for the framed panels + hero drift-out */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .frame-glow {
+      animation:
+        framePulse 6s ease-in-out infinite,
+        sdPanelIn linear both;
+      animation-timeline: auto, view();
+      animation-range:
+        normal,
+        entry 0% cover 16%;
+    }
+    @keyframes sdPanelIn {
+      from {
+        transform: translateY(46px) scale(0.986);
+      }
+      to {
+        transform: none;
+      }
+    }
+
+    /* About columns slide in from their own side */
+    .frame-glow.sd-col-left,
+    .frame-glow.sd-col-right {
+      animation:
+        framePulse 6s ease-in-out infinite,
+        sdColFromLeft linear both;
+      animation-timeline: auto, view();
+      animation-range:
+        normal,
+        entry 0% entry 80%;
+    }
+    .frame-glow.sd-col-right {
+      animation-name: framePulse, sdColFromRight;
+    }
+    @keyframes sdColFromLeft {
+      from {
+        transform: translateX(-60px);
+      }
+      to {
+        transform: none;
+      }
+    }
+    @keyframes sdColFromRight {
+      from {
+        transform: translateX(60px);
+      }
+      to {
+        transform: none;
+      }
+    }
+
+    .hero-lift {
+      animation: heroLift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+    @keyframes heroLift {
+      to {
+        opacity: 0;
+        transform: translateY(-72px);
+      }
+    }
+  }
+}
+
+/* language switch — full-page crossfade via the View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- scroll performance --------------------------------------------------- */
+/* the continuous decorative effects (gold-shadow pulse, spinning conic rim,
+   accent-line glow) are paint-heavy; freeze them while the page is scrolling
+   so the main thread stays free, then resume when the user stops.
+   `.frame-glow` runs two animations (framePulse + the scroll-driven entry) —
+   pause only the first so the reveal keeps tracking scroll. */
+html.is-scrolling .frame-glow,
+html.is-scrolling .hero-frame-bloom,
+html.is-scrolling .hero-frame-rim {
+  animation-play-state: paused, running;
+}
+html.is-scrolling .frame-glow::after,
+html.is-scrolling .proc-accent,
+html.is-scrolling .intro-power-ring {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal="line"] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .btn-lift {
+    transition:
+      background-color 0.5s ease,
+      color 0.5s ease,
+      border-color 0.5s ease;
+  }
+  .btn-lift:hover,
+  .btn-lift:active {
+    transform: none;
+  }
+  .hero-media,
+  .rail-hint,
+  .hero-frame-bloom,
+  .hero-frame-rim,
+  .frame-glow,
+  .frame-glow::after,
+  .proc-accent,
+  .intro-power-ring {
+    animation: none;
+  }
+  .intro-gate.is-entering,
+  .site-lit #top {
+    animation: none;
+  }
+  .intro-gate.is-entering {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms ease;
+  }
+}
+
+/* --- custom cursor (desktop / pointer:fine only — JS adds this class) --- */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+.cursor-ring,
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 300;
+  border-radius: 999px;
+  will-change: transform;
+}
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--gold);
+  transition:
+    width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    opacity 0.25s ease;
+}
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  transition:
+    width 0.3s ease,
+    height 0.3s ease,
+    opacity 0.25s ease;
+}
+.cursor-hover .cursor-ring {
+  width: 60px;
+  height: 60px;
+  background: rgba(207, 161, 90, 0.14);
+  border-color: var(--gold-soft);
+}
+.cursor-hover .cursor-dot {
+  width: 0;
+  height: 0;
+}
+.cursor-down .cursor-ring {
+  width: 26px;
+  height: 26px;
+}
+@media (pointer: coarse) {
+  .cursor-ring,
+  .cursor-dot {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring,
+  .cursor-dot {
+    transition: opacity 0.25s ease;
+  }
+}
