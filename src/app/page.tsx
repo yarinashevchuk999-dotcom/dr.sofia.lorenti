@@ -94,9 +94,13 @@ export default function Home() {
           >
             {t.hero.role}
           </p>
-          {/* overflow-hidden mask — the h1 emerges from behind this edge on
-              scroll instead of just fading in; visually identical at rest */}
-          <div className="overflow-hidden">
+          {/* overflow-hidden mask — the h1 emerges from behind this edge as
+              you scroll instead of just fading in; visually identical at
+              rest. pb-14/-mb-14 give the lift distance room inside the mask
+              (matching titleLiftPx below) so the animation never clips the
+              second line, then cancel the extra box height so nothing below
+              shifts down. */}
+          <div className="overflow-hidden pb-14 -mb-14">
             <h1
               ref={heroTitleRef}
               className="display hero-heading whitespace-nowrap text-[clamp(2.35rem,9.9vw,10rem)] [text-shadow:0_2px_60px_rgba(0,0,0,0.18)]"

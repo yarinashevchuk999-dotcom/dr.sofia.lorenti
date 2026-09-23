@@ -12,8 +12,8 @@ function clamp01(v: number) {
 
 type Stage = {
   ref: RefObject<HTMLElement | null>;
-  delay: number;
-  duration: number;
+  start: number;
+  end: number;
   liftPx: number;
   /** eyebrow/desc/CTA settle from slightly below; the title uses a bigger
    * lift + its own overflow-hidden wrapper so it reads as emerging from
@@ -22,18 +22,17 @@ type Stage = {
 };
 
 /**
- * Cinematic entrance for the Hero — eyebrow → title → description → CTA
- * stagger in (opacity + translateY, easeOutCubic, no bounce/overshoot) once
- * on mount, plus a slow continuous scroll-driven video zoom (scale 1 →
- * ~1.07) + a whisper of parallax drift on a dedicated wrapper around the
- * <video> so it never fights the video's own load-in CSS animation.
+ * Cinematic scroll-driven reveal for the Hero, sharing one progress value
+ * (0 = pin starts, 1 = pin releases) across:
+ *  - a staggered enter for eyebrow → title → description → CTA (opacity +
+ *    translateY, easeOutCubic, no bounce/overshoot) as the visitor scrolls
+ *  - a slow continuous video zoom (scale 1 → ~1.07) + a whisper of parallax
+ *    drift, applied to a dedicated wrapper around the <video> so it never
+ *    fights the video's own load-in CSS animation
  *
- * The staggered entrance is time-based (plays once, right away), NOT tied
- * to scroll position: the hero is the first thing on the page, so scroll
- * progress starts at 0 on load, and an earlier scroll-linked version of
- * this left the title stuck hidden/clipped behind its overflow-hidden mask
- * until the visitor scrolled — invisible on first paint on mobile. The
- * video zoom is still scroll-linked (that part was never the problem).
+ * The title's liftPx (56) must stay ≤ the spare room the mask wrapper around
+ * the <h1> reserves (see the pb-14/-mb-14 on that div in page.tsx) — otherwise
+ * the second line clips during the animation instead of sliding in clean.
  */
 export function useHeroCinematicReveal(
   trackRef: RefObject<HTMLElement | null>,
@@ -48,10 +47,10 @@ export function useHeroCinematicReveal(
     if (!track) return;
 
     const stages: Stage[] = [
-      { ref: eyebrowRef, delay: 80, duration: 700, liftPx: 20 },
-      { ref: titleRef, delay: 160, duration: 900, liftPx: 56 },
-      { ref: descRef, delay: 320, duration: 700, liftPx: 15 },
-      { ref: ctaRef, delay: 420, duration: 700, liftPx: 15, scale: true },
+      { ref: eyebrowRef, start: 0, end: 0.12, liftPx: 20 },
+      { ref: titleRef, start: 0.04, end: 0.24, liftPx: 56 },
+      { ref: descRef, start: 0.16, end: 0.32, liftPx: 15 },
+      { ref: ctaRef, start: 0.26, end: 0.42, liftPx: 15, scale: true },
     ];
 
     const applyFinal = () => {
@@ -63,58 +62,44 @@ export function useHeroCinematicReveal(
           ? "translateY(0px) scale(1)"
           : "translateY(0px)";
       }
+      const vEl = videoWrapRef.current;
+      if (vEl) vEl.style.transform = "translateY(0px) scale(1)";
     };
 
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-
-    let entranceRaf = 0;
-    let safetyTimer = 0;
     if (reduce) {
+      // no motion, but content must never be left stuck hidden
       applyFinal();
-    } else {
-      for (const stage of stages) {
-        const el = stage.ref.current;
-        if (!el) continue;
-        el.style.opacity = "0";
-        el.style.transform = stage.scale
-          ? `translateY(${stage.liftPx}px) scale(0.98)`
-          : `translateY(${stage.liftPx}px)`;
-      }
-      const start = performance.now();
-      const tick = (now: number) => {
-        const t = now - start;
-        let allDone = true;
-        for (const stage of stages) {
-          const el = stage.ref.current;
-          if (!el) continue;
-          const local = clamp01((t - stage.delay) / stage.duration);
-          if (local < 1) allDone = false;
-          const ease = easeOutCubic(local);
-          const lift = (1 - ease) * stage.liftPx;
-          el.style.transform = stage.scale
-            ? `translateY(${lift.toFixed(1)}px) scale(${(0.98 + ease * 0.02).toFixed(3)})`
-            : `translateY(${lift.toFixed(1)}px)`;
-          el.style.opacity = ease.toFixed(3);
-        }
-        if (!allDone) entranceRaf = requestAnimationFrame(tick);
-      };
-      entranceRaf = requestAnimationFrame(tick);
-      // belt-and-braces: never leave the hero stuck invisible (e.g. a
-      // backgrounded/throttled tab pausing rAF mid-entrance)
-      safetyTimer = window.setTimeout(applyFinal, 2200);
+      return;
     }
 
-    // scroll-driven video zoom — separate from the entrance above, keeps
-    // running for as long as the hero track is on screen
     let frame = 0;
-    const updateVideo = () => {
+
+    const update = () => {
       frame = 0;
       const rect = track.getBoundingClientRect();
       const scrollable = rect.height - window.innerHeight;
       if (scrollable <= 0) return;
       const progress = clamp01(-rect.top / scrollable);
+
+      for (const stage of stages) {
+        const el = stage.ref.current;
+        if (!el) continue;
+        const local = clamp01(
+          (progress - stage.start) / (stage.end - stage.start),
+        );
+        const ease = easeOutCubic(local);
+        const lift = (1 - ease) * stage.liftPx;
+        el.style.transform = stage.scale
+          ? `translateY(${lift.toFixed(1)}px) scale(${(0.98 + ease * 0.02).toFixed(3)})`
+          : `translateY(${lift.toFixed(1)}px)`;
+        el.style.opacity = ease.toFixed(3);
+      }
+
+      // video: slow continuous Ken-Burns zoom + subtle parallax drift,
+      // across the whole pin — independent, slower rhythm than the content
       const vEl = videoWrapRef.current;
       if (vEl) {
         const scale = 1 + progress * 0.07; // 1 → 1.07
@@ -122,18 +107,18 @@ export function useHeroCinematicReveal(
         vEl.style.transform = `translateY(${drift.toFixed(1)}px) scale(${scale.toFixed(4)})`;
       }
     };
+
     const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(updateVideo);
+      if (!frame) frame = requestAnimationFrame(update);
     };
-    updateVideo();
+
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       if (frame) cancelAnimationFrame(frame);
-      if (entranceRaf) cancelAnimationFrame(entranceRaf);
-      if (safetyTimer) window.clearTimeout(safetyTimer);
     };
   }, [trackRef, videoWrapRef, eyebrowRef, titleRef, descRef, ctaRef]);
 }
