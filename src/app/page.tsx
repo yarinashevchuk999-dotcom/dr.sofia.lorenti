@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import SiteNav from "@/components/SiteNav";
-import IntroGate from "@/components/IntroGate";
 import SmoothScroll from "@/components/SmoothScroll";
 import Reveal from "@/components/Reveal";
 import Parallax from "@/components/Parallax";
@@ -43,7 +42,6 @@ export default function Home() {
 
   return (
     <>
-      <IntroGate />
       <BookingModal />
       <CustomCursor />
       <div className="scroll-progress" aria-hidden="true" />
