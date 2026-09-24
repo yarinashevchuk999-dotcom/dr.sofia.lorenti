@@ -70,7 +70,6 @@ export default function Home() {
                 aria-label="DR. SOFIA LORENTI"
                 autoPlay
                 muted
-                loop
                 playsInline
                 preload="auto"
                 className="hero-media h-full w-full scale-105 object-cover object-[70%_32%]"
